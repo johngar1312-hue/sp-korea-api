@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from pydantic import BaseModel
 from typing import List
 import os
@@ -57,12 +57,12 @@ def get_db():
         db.close()
 
 @app.get("/api/products", response_model=List[Product])
-def get_products(skip: int = 0, limit: int = 100, db: Session = next(get_db())):
+def get_products(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     products = db.query(ProductDB).offset(skip).limit(limit).all()
     return products
 
 @app.get("/api/products/{product_id}", response_model=Product)
-def get_product(product_id: int, db: Session = next(get_db())):
+def get_product(product_id: int, db: Session = Depends(get_db)):
     product = db.query(ProductDB).filter(ProductDB.id == product_id).first()
     if product is None:
         raise HTTPException(status_code=404, detail="Товар не найден")
