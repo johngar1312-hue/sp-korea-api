@@ -1,20 +1,18 @@
 from fastapi import FastAPI, HTTPException, Depends
 from pydantic import BaseModel
 from typing import List
-import os
 from sqlalchemy import create_engine, Column, Integer, String, Float, Boolean, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
-from fastapi.middleware.cors import CORSMiddleware  # Добавлено для CORS
+from fastapi.middleware.cors import CORSMiddleware
 
-# === Настройка базы данных ===
+# === База данных ===
 DATABASE_URL = "sqlite:///../data/products.db"
-
 engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
-# === Модель товара ===
+# === Модель ===
 class ProductDB(Base):
     __tablename__ = 'products'
     id = Column(Integer, primary_key=True)
@@ -31,7 +29,7 @@ class ProductDB(Base):
     quantity = Column(Integer, default=10)
     created_at = Column(DateTime)
 
-# === Pydantic-схема ===
+# === Схема Pydantic ===
 class Product(BaseModel):
     id: int
     article: str
@@ -50,10 +48,10 @@ class Product(BaseModel):
 
 app = FastAPI(title="SP Korea API", docs_url="/", redoc_url=None)
 
-# === Добавлено: CORS для доступа с фронтенда ===
+# === CORS ===
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Разрешить всем (временно)
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
