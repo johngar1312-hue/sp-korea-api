@@ -5,6 +5,7 @@ import os
 from sqlalchemy import create_engine, Column, Integer, String, Float, Boolean, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
+from fastapi.middleware.cors import CORSMiddleware  # Добавлено для CORS
 
 # === Настройка базы данных ===
 DATABASE_URL = "sqlite:///../data/products.db"
@@ -48,6 +49,15 @@ class Product(BaseModel):
         from_attributes = True
 
 app = FastAPI(title="SP Korea API", docs_url="/", redoc_url=None)
+
+# === Добавлено: CORS для доступа с фронтенда ===
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Разрешить всем (временно)
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 def get_db():
     db = SessionLocal()
