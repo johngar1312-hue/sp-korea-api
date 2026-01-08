@@ -6,8 +6,9 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 from fastapi.middleware.cors import CORSMiddleware
 
-# === База данных ===
-DATABASE_URL = "sqlite:///../data/products.db"
+# === ИСПРАВЛЕНО: база данных теперь в корне ===
+DATABASE_URL = "sqlite:///products.db"
+
 engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
@@ -63,6 +64,10 @@ def get_db():
         yield db
     finally:
         db.close()
+
+@app.on_event("startup")
+def startup():
+    Base.metadata.create_all(bind=engine)
 
 @app.get("/api/products", response_model=List[Product])
 def get_products(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
