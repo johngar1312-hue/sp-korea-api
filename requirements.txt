@@ -2,4 +2,3 @@ fastapi
 uvicorn
 python-multipart
 pydantic
-sqlite3  # встроен, но если используешь ORM — добавь `sqlalchemy`
