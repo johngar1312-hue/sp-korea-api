@@ -1,19 +1,19 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from api.routers import products, temp_cart  # ✅ Импортируем оба роутера
+from api.routers import products, temp_cart
 
 app = FastAPI(title="SP Korea API", description="API для товаров и временных корзин")
 
-# Настройка CORS
+# Настройка CORS — ДОЛЖНА БЫТЬ ПЕРВОЙ
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # В продакшене укажи домены: ['https://sp-korea-web-app.vercel.app']
+    allow_origins=["*"],  # Разрешаем все домены (временно)
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Корневой маршрут — важен для Render
+# Корневой маршрут
 @app.get("/")
 async def read_root():
     return {
@@ -25,6 +25,6 @@ async def read_root():
         ]
     }
 
-# Подключаем маршруты
-app.include_router(products.router)      # /api/products
-app.include_router(temp_cart.router)    # /api/temp-cart/{id}
+# Подключаем роуты
+app.include_router(products.router)
+app.include_router(temp_cart.router)
