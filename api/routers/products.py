@@ -6,8 +6,7 @@ import os
 router = APIRouter(tags=["products"])
 
 # 🔥 ФИКС: путь к БД — только через /var/lib/sp-korea/data/products.db
-DB_PATH = "/var/lib/sp-korea/data/products.db"
-
+DB_PATH = "data/products.db"
 print("📁 Путь к БД:", DB_PATH)
 
 def get_db():
