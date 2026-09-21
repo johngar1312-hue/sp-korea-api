@@ -1,0 +1,846 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#0b0f19" />
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<title>Подрядчик — личный ежедневник</title>
+<link rel="manifest" href="manifest.json" />
+<link rel="apple-touch-icon" href="icon-192.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<style>
+:root{
+  --bg:#0b0f19;
+  --card:#151b2c;
+  --ink:#f8fafc;
+  --muted:#64748b;
+  --line:#222d45;
+  --blue:#3b82f6;
+  --blue-glow:rgba(59,130,246,0.35);
+  --green:#10b981;
+  --green-glow:rgba(16,185,129,0.25);
+  --amber:#f59e0b;
+  --amber-glow:rgba(245,158,11,0.2);
+  --red:#ef4444;
+  --red-glow:rgba(239,68,68,0.2);
+  --purple:#8b5cf6;
+  --shadow:0 12px 40px rgba(0,0,0,0.3);
+  --r:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,sans-serif;padding-bottom:90px;}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer;border:0;user-select:none;-webkit-user-select:none;}
+.app{min-height:100vh;display:flex;flex-direction:column;}
+.topbar{height:70px;background:#0f172a;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 22px;position:sticky;top:0;z-index:10;border-bottom:1px solid var(--line);}
+.brand{display:flex;align-items:center;gap:11px;font-weight:800;letter-spacing:-.02em}
+.brandmark{width:36px;height:36px;border-radius:12px;background:linear-gradient(135deg,#60a5fa,#2563eb);display:grid;place-items:center;font-size:19px}
+.main{padding:25px 22px;max-width:1200px;margin:0 auto;width:100%;flex:1;}
+.page{display:none;}
+.page.active{display:block;}
+.page-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:21px}
+.page-head h1{font-size:28px;margin:0 0 5px;letter-spacing:-.04em}
+.page-head p{color:var(--muted);margin:0}
+.primary{background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fff;padding:12px 20px;border-radius:12px;font-weight:700;box-shadow:0 4px 20px var(--blue-glow);transition:all .2s ease;border:1px solid rgba(255,255,255,0.1);}
+.primary:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(59,130,246,0.5);}
+.secondary{background:#1e293b;color:#e2e8f0;padding:12px 20px;border-radius:12px;font-weight:600;border:1px solid var(--line);transition:all .2s ease;}
+.secondary:hover{background:#273549;color:#fff;}
+.grid{display:grid;gap:16px}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px;box-shadow:var(--shadow)}
+.stat-label{color:var(--muted);font-size:13px;font-weight:650}
+.stat-value{font-size:27px;font-weight:850;letter-spacing:-.04em;margin:9px 0 4px}
+.tax-card{background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:var(--r);padding:16px;margin-top:14px;position:relative;overflow:hidden;}
+.tax-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--amber);}
+.object-footer{display:flex;gap:8px;margin-top:15px;padding-top:13px;border-top:1px solid var(--line);}
+.bottom-nav{display:flex;position:fixed;bottom:0;left:0;right:0;height:67px;background:rgba(21,27,44,0.96);border-top:1px solid var(--line);z-index:15;justify-content:space-around;padding-bottom:env(safe-area-inset-bottom);backdrop-filter:blur(10px);user-select:none;-webkit-user-select:none;}
+.bottom-nav button{background:transparent;color:#7b8798;font-size:10px;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;flex:1;}
+.bottom-nav button.active{color:var(--blue)}
+.bottom-nav button.center-btn{color:#fff;}
+.bottom-nav button.center-btn .icon{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#1d4ed8);display:grid;place-items:center;font-size:20px;box-shadow:0 4px 15px var(--blue-glow);margin-top:-15px;}
+.badge{display:inline-flex;align-items:center;padding:5px 9px;border-radius:999px;font-size:11px;font-weight:800;white-space:nowrap}
+.blue{background:rgba(59,130,246,0.15);color:#60a5fa}
+.green{background:rgba(16,185,129,0.15);color:#34d399}
+.amber{background:rgba(245,158,11,0.15);color:#fbbf24}
+.red{background:rgba(239,68,68,0.15);color:#f87171}
+.input,.select,.textarea{width:100%;border:1px solid var(--line);background:#1e293b;border-radius:10px;padding:12px;color:var(--ink);outline:0;font-size:16px;}
+.input:focus,.select:focus,.textarea:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,0.25)}
+.field{margin-bottom:13px}
+.field label{display:block;font-size:12px;color:var(--muted);font-weight:750;margin-bottom:6px}
+.modal-bg{position:fixed;inset:0;background:rgba(11,15,25,0.75);display:none;align-items:center;justify-content:center;padding:18px;z-index:30;backdrop-filter:blur(4px);}
+.modal-bg.open{display:flex}
+.modal{background:var(--card);width:min(550px,100%);max-height:90vh;overflow:auto;border-radius:20px;padding:21px;border:1px solid var(--line);box-shadow:var(--shadow)}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.modal-head h2{font-size:20px;margin:0}
+.close{background:#1e293b;color:var(--muted);border-radius:9px;padding:6px 12px;font-size:14px;font-weight:700;}
+.modal-foot{display:flex;justify-content:flex-end;gap:9px;margin-top:17px}
+.sheet-bg{position:fixed;inset:0;background:rgba(11,15,25,0.6);display:none;align-items:flex-end;z-index:40;backdrop-filter:blur(2px);}
+.sheet-bg.open{display:flex}
+.sheet{background:var(--card);width:100%;border-radius:24px 24px 0 0;padding:24px;border-top:1px solid var(--line);box-shadow:0 -10px 40px rgba(0,0,0,0.4);transform:translateY(100%);transition:transform 0.3s ease;}
+.sheet-bg.open .sheet{transform:translateY(0);}
+.sheet-title{font-size:18px;font-weight:800;margin-bottom:16px;text-align:center;color:var(--muted);}
+.sheet-grid{display:grid;grid-template-columns:1fr;gap:10px}
+.sheet-btn{width:100%;background:#1e293b;color:var(--ink);padding:14px;border-radius:12px;text-align:left;font-weight:700;display:flex;align-items:center;gap:12px;border:1px solid var(--line);}
+.sheet-btn:active{background:#273549;}
+.auth-container{position:fixed;inset:0;background:var(--bg);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;}
+.auth-box{background:var(--card);border:1px solid var(--line);padding:30px;border-radius:24px;width:min(400px,100%);box-shadow:var(--shadow);text-align:center;}
+.auth-box h2{margin:0 0 10px;font-size:24px;}
+.auth-box p{color:var(--muted);margin-bottom:20px;font-size:14px;}
+.auth-toggle{margin-top:15px;display:inline-block;color:var(--blue);font-size:13px;font-weight:600;}
+.tabs{display:flex;gap:5px;background:#1e293b;padding:4px;border-radius:11px;width:max-content;margin-bottom:16px}
+.tab{padding:8px 12px;border-radius:8px;background:transparent;color:var(--muted);font-weight:700;font-size:13px}
+.tab.active{background:var(--card);color:var(--blue);box-shadow:0 2px 7px rgba(0,0,0,0.2)}
+.object-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
+.object-top h3{margin:0 0 4px;font-size:18px;}
+.object-top p{margin:0;color:var(--muted);font-size:13px;}
+.history-list,.list-wrap{margin-top:12px;display:grid;gap:8px;}
+.history-item{font-size:12px;color:var(--muted);background:rgba(255,255,255,0.02);padding:6px 10px;border-radius:6px;border-left:2px solid var(--line);}
+.toast{position:fixed;bottom:85px;left:50%;transform:translateX(-50%) translateY(20px);background:#1e293b;color:#fff;padding:12px 16px;border-radius:12px;opacity:0;pointer-events:none;transition:.25s;z-index:50;font-size:13px;border:1px solid var(--line);box-shadow:var(--shadow);}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media(max-width:700px){.g3,.g2{grid-template-columns:1fr;}}
+</style>
+<!-- Подключаем официальный клиент Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<!-- Экран авторизации -->
+<div id="authScreen" class="auth-container">
+  <div class="auth-box">
+    <div class="brandmark" style="margin: 0 auto 15px; width: 48px; height: 48px; font-size: 24px;">👷</div>
+    <h2 id="authTitle">Вход в «Подрядчик»</h2>
+    <p id="authDesc">Ежедневник промальпа и фасадных работ с авторасчетом УСН 6%</p>
+    <form id="authForm" onsubmit="handleAuth(event)">
+      <div class="field" style="text-align: left;">
+        <label>Email</label>
+        <input type="email" id="authEmail" class="input" required placeholder="name@example.com" />
+      </div>
+      <div class="field" style="text-align: left;">
+        <label>Пароль</label>
+        <input type="password" id="authPassword" class="input" required placeholder="••••••••" />
+      </div>
+      <button type="submit" class="primary" style="width: 100%; margin-top: 10px;" id="authBtn">Войти</button>
+    </form>
+    <a href="#" class="auth-toggle" id="authToggle" onclick="toggleAuthMode()">Нет аккаунта? Зарегистрироваться</a>
+  </div>
+</div>
+
+<div class="app" id="appContent" style="display:none;">
+  <div class="topbar">
+    <div class="brand">
+      <div class="brandmark">👷</div>
+      <span>Подрядчик</span>
+    </div>
+    <div style="display:flex; gap:8px;">
+      <button class="secondary" style="padding: 6px 12px; font-size:12px;" onclick="logOut()">Выйти</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <!-- Кнопки переключения бизнес/личное глобально -->
+    <div class="tabs" id="globalModeTabs">
+      <button class="tab active" onclick="setGlobalMode('business')">Бизнес (ИП)</button>
+      <button class="tab" onclick="setGlobalMode('personal')">Личные деньги</button>
+    </div>
+
+    <!-- Страница Сегодня -->
+    <div id="page-today" class="page active">
+      <div class="page-head">
+        <div>
+          <h1 id="today-date-title">Задачи на сегодня</h1>
+          <p>Сводная аналитика по всем объектам в Чите</p>
+        </div>
+      </div>
+      
+      <!-- Общий дашборд финансов -->
+      <div id="business-dashboard" class="grid g3" style="margin-bottom:20px;">
+        <div class="card">
+          <div class="stat-label">Всего получено по факту</div>
+          <div class="stat-value money" id="dash-received" style="color:var(--green)">0 ₽</div>
+        </div>
+        <div class="card">
+          <div class="stat-label">Резерв на налог УСН 6%</div>
+          <div class="stat-value money" id="dash-tax" style="color:var(--amber)">0 ₽</div>
+        </div>
+        <div class="card">
+          <div class="stat-label">Чистый остаток (свободный)</div>
+          <div class="stat-value money" id="dash-clean" style="color:var(--ink)">0 ₽</div>
+        </div>
+      </div>
+
+      <div id="personal-dashboard" class="card" style="display:none; margin-bottom:20px; border-color: var(--purple);">
+        <div class="stat-label" style="color:var(--purple)">Личный бюджет (Свободные средства)</div>
+        <div class="stat-value money" id="dash-personal-balance">0 ₽</div>
+        <div class="stat-note">Не смешивается с расходами и налогами по объектам</div>
+      </div>
+
+      <div class="grid g2">
+        <div class="card">
+          <div class="section-title">Задачи и Дедлайны</div>
+          <div id="today-tasks-list" class="list-wrap"><div class="empty">На сегодня задач нет</div></div>
+        </div>
+        <div class="card">
+          <div class="section-title">Тренировки (Спорт)</div>
+          <div id="today-sports-list" class="list-wrap"><div class="empty">Тренировок сегодня нет</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Страница Объекты -->
+    <div id="page-objects" class="page">
+      <div class="page-head">
+        <div>
+          <h1>Строительные объекты</h1>
+          <p>Контроль смет, этапов и оплат</p>
+        </div>
+        <button class="primary" onclick="openModal('modal-object')">➕ Новый объект</button>
+      </div>
+      <div id="objects-grid" class="grid g2"></div>
+    </div>
+
+    <!-- Страница Закупки -->
+    <div id="page-purchases" class="page">
+      <div class="page-head">
+        <div>
+          <h1>Планирование закупок</h1>
+          <p>Корзины материалов, счета и номера заказов</p>
+        </div>
+      </div>
+      <div id="purchases-global-list" class="grid g2"></div>
+    </div>
+
+    <!-- Страница Финансы -->
+    <div id="page-finances" class="page">
+      <div class="page-head">
+        <div>
+          <h1>Финансовый архив</h1>
+          <p>История всех движений денежных средств</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="section-title">История транзакций</div>
+        <div id="global-transactions-log" class="list-wrap"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Нижний бар навигации -->
+  <nav class="bottom-nav">
+    <button onclick="switchPage('today')" id="nav-today" class="active">📅<span>Сегодня</span></button>
+    <button onclick="switchPage('objects')" id="nav-objects">🏢<span>Объекты</span></button>
+    <button onclick="openQuickSheet()" class="center-btn"><div class="icon">＋</div><span>Добавить</span></button>
+    <button onclick="switchPage('purchases')" id="nav-purchases">🛒<span>Закупки</span></button>
+    <button onclick="switchPage('finances')" id="nav-finances">💰<span>Финансы</span></button>
+  </nav>
+</div>
+
+<!-- ВЫЕЗЖАЮЩАЯ ШТОРКА БЫСТРЫХ ДЕЙСТВИЙ -->
+<div class="sheet-bg" id="quickSheet" onclick="closeQuickSheet()">
+  <div class="sheet" onclick="event.stopPropagation()">
+    <div class="sheet-title">БЫСТРОЕ ДЕЙСТВИЕ</div>
+    <div class="sheet-grid">
+      <button class="sheet-btn" onclick="openQuickAction('payment')">💰 Добавить приход (Оплату от заказчика)</button>
+      <button class="sheet-btn" onclick="openQuickAction('purchase')">🛒 Добавить закупку / Собрать корзину</button>
+      <button class="sheet-btn" onclick="openQuickAction('expense')">📉 Добавить расход объекта (Расходники, Бригада)</button>
+      <button class="sheet-btn" onclick="openQuickAction('task')">📝 Создать задачу на сегодня</button>
+      <button class="sheet-btn" onclick="openQuickAction('sport')">🏋️ Записать тренировку</button>
+      <button class="sheet-btn" onclick="openQuickAction('personal')">💜 Личный расход/приход денег</button>
+    </div>
+    <button class="secondary" style="width:100%; margin-top:15px; border-radius:12px;" onclick="closeQuickSheet()">Отмена</button>
+  </div>
+</div>
+
+<!-- Модалка: Новый объект -->
+<div class="modal-bg" id="modal-object">
+  <div class="modal">
+    <div class="modal-head">
+      <h2>Создание нового объекта</h2>
+      <button class="close" onclick="closeModal('modal-object')">✕</button>
+    </div>
+    <form onsubmit="createObject(event)">
+      <div class="field">
+        <label>Название / Адрес объекта</label>
+        <input type="text" id="obj-name" class="input" required placeholder="Например: ЖК Атмосфера, швы" />
+      </div>
+      <div class="field">
+        <label>Выберите вид работы по читинскому тарифу</label>
+        <select id="obj-tariff-select" class="select" onchange="applyTariffPrice()">
+          <option value="custom">Указать вручную (Своя цена)</option>
+          <option value="1700">Ремонт межпанельных швов под ключ (1700 ₽/пог.м)</option>
+          <option value="1500">Монтаж водосточных систем (1500 ₽/пог.м)</option>
+          <option value="5000">Наружное утепление фасадов (5000 ₽/м²)</option>
+          <option value="600">Ремонтная штукатурка фасада (600 ₽/м²)</option>
+          <option value="500">Покраска с веревок высотная (500 ₽/м²)</option>
+          <option value="300">Покраска с ног без веревок (300 ₽/м²)</option>
+          <option value="80">Мойка остекления промальп (80 ₽/м²)</option>
+          <option value="40">Мойка подъездов клининг (40 ₽/м²)</option>
+        </select>
+      </div>
+      <div class="grid g2">
+        <div class="field">
+          <label>Объем работы (м / м²)</label>
+          <input type="number" id="obj-volume" class="input" value="1" min="1" oninput="recalcModalContractTotal()" />
+        </div>
+        <div class="field">
+          <label>Цена за единицу (₽)</label>
+          <input type="number" id="obj-price-unit" class="input" value="0" oninput="recalcModalContractTotal()" />
+        </div>
+      </div>
+      <div class="field">
+        <label>Полная сумма договора (Рассчитано)</label>
+        <input type="number" id="obj-contract-total" class="input" readonly />
+      </div>
+      <div class="modal-foot">
+        <button type="button" class="secondary" onclick="closeModal('modal-object')">Отмена</button>
+        <button type="submit" class="primary">Создать объект</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Модалка: Операции (Приход, Расход, Закупка, Задача, Спорт) -->
+<div class="modal-bg" id="modal-action">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="action-modal-title">Добавить операцию</h2>
+      <button class="close" onclick="closeModal('modal-action')">✕</button>
+    </div>
+    <form id="actionForm" onsubmit="submitQuickAction(event)">
+      <input type="hidden" id="action-type" />
+      
+      <!-- Поле выбора объекта (актуально для прихода, расхода, закупки) -->
+      <div class="field" id="action-obj-field">
+        <label>Привязать строго к объекту</label>
+        <select id="action-object-id" class="select"></select>
+      </div>
+
+      <!-- Специфичные поля для Финансов/Закупок -->
+      <div id="financial-fields">
+        <div class="grid g2">
+          <div class="field">
+            <label>Сумма (₽)</label>
+            <input type="number" id="action-amount" class="input" placeholder="0" />
+          </div>
+          <div class="field" id="payment-type-field">
+            <label>Тип платежа</label>
+            <select id="action-payment-type" class="select">
+              <option value="аванс">Аванс</option>
+              <option value="промежуточный">Промежуточная оплата</option>
+              <option value="финал">Финальный расчет</option>
+            </select>
+          </div>
+        </div>
+        <div class="field" id="purchase-status-field" style="display:none;">
+          <label>Статус закупки</label>
+          <select id="action-purchase-status" class="select">
+            <option value="Запланировано">Запланировано (Сбор корзины)</option>
+            <option value="Ожидает оплаты">Ожидает оплаты</option>
+            <option value="Оплачено">Оплачено (Уйдет в расход)</option>
+          </select>
+        </div>
+        <div class="field" id="purchase-meta-field" style="display:none;">
+          <label>Номер заказа / Счета / Магазин</label>
+          <input type="text" id="action-purchase-meta" class="input" placeholder="Например: Счет №452 в Вегос-М" />
+        </div>
+        <div class="field" id="payment-method-field">
+          <label>Способ / Назначение</label>
+          <input type="text" id="action-method" class="input" placeholder="Наличные, Перевод на карту, Р/С" />
+        </div>
+      </div>
+
+      <!-- Поля для Задач / Спорта / Заметок -->
+      <div id="text-fields" style="display:none;">
+        <div class="field">
+          <label>Наименование / Что сделать</label>
+          <input type="text" id="action-title" class="input" placeholder="Описание..." />
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Комментарий / Примечание</label>
+        <textarea id="action-comment" class="textarea" placeholder="Дополнительные детали..."></textarea>
+      </div>
+
+      <div class="modal-foot">
+        <button type="button" class="secondary" onclick="closeModal('modal-action')">Отмена</button>
+        <button type="submit" class="primary">Сохранить</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="toast" id="toast">Действие выполнено</div>
+
+<script>
+// ВСТАВЬ СЮДА СВОИ КЛЮЧИ ИЗ SUPABASE
+const SUPABASE_URL = "https://cipvvsvljrcaidqjinke.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpcHZ2c3ZsanJjYWlkcWppbmtlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5NjQzNTksImV4cCI6MjEwNTU0MDM1OX0.L1wYr9mIRD9V553275uTJIbZR-uLwRMuyj29LheZyt8";
+
+let supabase = null;
+if(SUPABASE_URL !== "ЗАМЕНИ_НА_ТВОЙ_SUPABASE_URL") {
+  supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+}
+
+let currentUser = null;
+let globalMode = 'business'; // business или personal
+let state = {
+  objects: [],
+  transactions: [],
+  tasks: [],
+  sports: []
+};
+
+// Проверка сессии при старте
+window.addEventListener('DOMContentLoaded', async () => {
+  document.getElementById('today-date-title').innerText = "Сегодня: " + new Date().toLocaleDateString('ru-RU', {day:'numeric', month:'long'});
+  if (!supabase) {
+    alert("Бро! Сначала замени заглушки SUPABASE_URL и SUPABASE_KEY в коде на реальные ключи из твоего проекта Supabase!");
+    return;
+  }
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session) {
+    currentUser = session.user;
+    initApp();
+  }
+});
+
+function toggleAuthMode() {
+  const title = document.getElementById('authTitle');
+  const btn = document.getElementById('authBtn');
+  const toggle = document.getElementById('authToggle');
+  if(btn.innerText === "Войти") {
+    title.innerText = "Регистрация в «Подрядчик»";
+    btn.innerText = "Создать аккаунт";
+    toggle.innerText = "Уже есть аккаунт? Войти";
+  } else {
+    title.innerText = "Вход в «Подрядчик»";
+    btn.innerText = "Войти";
+    toggle.innerText = "Нет аккаунта? Зарегистрироваться";
+  }
+}
+
+async function handleAuth(e) {
+  e.preventDefault();
+  const email = document.getElementById('authEmail').value;
+  const password = document.getElementById('authPassword').value;
+  const btn = document.getElementById('authBtn');
+  const isSignUp = btn.innerText !== "Войти";
+
+  // Блокируем кнопку на время запроса
+  btn.disabled = true;
+  btn.innerText = isSignUp ? "Регистрация..." : "Вход...";
+
+  try {
+    if(isSignUp) {
+      console.log("Регистрация:", email);
+      const { data, error } = await supabase.auth.signUp({ email, password });
+      if(error) { 
+        alert("Ошибка регистрации: " + error.message); 
+        btn.disabled = false;
+        btn.innerText = "Создать аккаунт";
+        return; 
+      }
+      alert("Бро, регистрация успешна! Проверь почту (если включено подтверждение) или попробуй войти.");
+      toggleAuthMode();
+      btn.disabled = false;
+      btn.innerText = "Войти";
+    } else {
+      console.log("Вход:", email);
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if(error) { 
+        alert("Ошибка входа: " + error.message); 
+        btn.disabled = false;
+        btn.innerText = "Войти";
+        return; 
+      }
+      console.log("Успешный вход, инициализация приложения...");
+      currentUser = data.user;
+      await initApp();
+      btn.disabled = false;
+      btn.innerText = "Войти";
+    }
+  } catch(err) {
+    console.error("Критическая ошибка авторизации:", err);
+    alert("Произошла ошибка: " + err.message);
+    btn.disabled = false;
+    btn.innerText = isSignUp ? "Создать аккаунт" : "Войти";
+  }
+}
+
+async function initApp() {
+  try {
+    console.log("initApp: показываем интерфейс...");
+    document.getElementById('authScreen').style.display = 'none';
+    document.getElementById('appContent').style.display = 'flex';
+    
+    console.log("initApp: синхронизация данных...");
+    await syncDataFromCloud();
+    
+    console.log("initApp: рендер...");
+    renderApp();
+    console.log("initApp: готово!");
+  } catch(err) {
+    console.error("Ошибка инициализации приложения:", err);
+    alert("Ошибка инициализации: " + err.message);
+  }
+}
+
+async function logOut() {
+  await supabase.auth.signOut();
+  location.reload();
+}
+
+// СИНХРОНИЗАЦИЯ С ОБЛАКОМ SUPABASE
+async function syncDataFromCloud() {
+  if (!currentUser) return;
+  try {
+    console.log("syncDataFromCloud: загрузка для user_id =", currentUser.id);
+    // Загружаем данные из таблицы профиля пользователя (храним весь стейт в json для простоты и бесплатности)
+    const { data, error } = await supabase.from('user_data').select('payload').eq('user_id', currentUser.id).maybeSingle();
+    if (error) {
+      console.error("Ошибка синхронизации:", error);
+      alert("Ошибка загрузки данных: " + error.message + "\n\nУбедись, что таблица user_data создана и есть RLS политики!");
+      // Не прерываем работу, используем пустую базу
+      state = { objects: [], transactions: [], tasks: [], sports: [] };
+    } else if (data && data.payload) {
+      console.log("syncDataFromCloud: данные загружены");
+      state = data.payload;
+    } else {
+      console.log("syncDataFromCloud: новый пользователь, пустая база");
+      // Новый пользователь — пустая база
+      state = { objects: [], transactions: [], tasks: [], sports: [] };
+    }
+  } catch(err) {
+    console.error("Критическая ошибка syncDataFromCloud:", err);
+    state = { objects: [], transactions: [], tasks: [], sports: [] };
+  }
+}
+
+async function saveToCloud() {
+  if (!currentUser) return;
+  const { error } = await supabase.from('user_data').upsert({ 
+    user_id: currentUser.id, 
+    payload: state,
+    updated_at: new Date()
+  });
+  if (error) console.error("Ошибка сохранения бэкапа:", error);
+  showToast("Данные сохранены в облако!");
+}
+
+// ЛОГИКА ИНТЕРФЕЙСА
+function switchPage(pageId) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + pageId).classList.add('active');
+  document.querySelectorAll('.bottom-nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('nav-' + pageId)?.classList.add('active');
+}
+
+function setGlobalMode(mode) {
+  globalMode = mode;
+  document.querySelectorAll('#globalModeTabs .tab').forEach(t => t.classList.remove('active'));
+  if (mode === 'business') {
+    document.querySelectorAll('#globalModeTabs .tab')[0].classList.add('active');
+    document.getElementById('business-dashboard').style.display = 'grid';
+    document.getElementById('personal-dashboard').style.display = 'none';
+  } else {
+    document.querySelectorAll('#globalModeTabs .tab')[1].classList.add('active');
+    document.getElementById('business-dashboard').style.display = 'none';
+    document.getElementById('personal-dashboard').style.display = 'block';
+  }
+  renderApp();
+}
+
+function openQuickSheet() { document.getElementById('quickSheet').style.display = 'flex'; setTimeout(() => document.getElementById('quickSheet').classList.add('open'), 10); }
+function closeQuickSheet() { document.getElementById('quickSheet').classList.remove('open'); setTimeout(() => document.getElementById('quickSheet').style.display = 'none', 300); }
+
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+function applyTariffPrice() {
+  const sel = document.getElementById('obj-tariff-select').value;
+  if(sel !== 'custom') {
+    document.getElementById('obj-price-unit').value = sel;
+    recalcModalContractTotal();
+  }
+}
+function recalcModalContractTotal() {
+  const v = parseFloat(document.getElementById('obj-volume').value) || 0;
+  const p = parseFloat(document.getElementById('obj-price-unit').value) || 0;
+  document.getElementById('obj-contract-total').value = Math.round(v * p);
+}
+
+function openQuickAction(type) {
+  closeQuickSheet();
+  document.getElementById('action-type').value = type;
+  
+  // Сброс видимости полей
+  document.getElementById('action-obj-field').style.display = 'block';
+  document.getElementById('financial-fields').style.display = 'block';
+  document.getElementById('purchase-status-field').style.display = 'none';
+  document.getElementById('purchase-meta-field').style.display = 'none';
+  document.getElementById('payment-type-field').style.display = 'none';
+  document.getElementById('payment-method-field').style.display = 'block';
+  document.getElementById('text-fields').style.display = 'none';
+  
+  // Наполнение селектора объектов
+  const sel = document.getElementById('action-object-id');
+  sel.innerHTML = state.objects.map(o => `<option value="${o.id}">${o.name}</option>`).join('');
+
+  if (type === 'payment') {
+    document.getElementById('action-modal-title').innerText = 'Добавить приход (Оплата)';
+    document.getElementById('payment-type-field').style.display = 'block';
+  } else if (type === 'expense') {
+    document.getElementById('action-modal-title').innerText = 'Добавить расход по объекту';
+  } else if (type === 'purchase') {
+    document.getElementById('action-modal-title').innerText = 'Запланировать закупку';
+    document.getElementById('purchase-status-field').style.display = 'block';
+    document.getElementById('purchase-meta-field').style.display = 'block';
+  } else if (type === 'task' || type === 'sport') {
+    document.getElementById('action-modal-title').innerText = type === 'task' ? 'Новая задача' : 'Запись тренировки';
+    document.getElementById('action-obj-field').style.display = 'none';
+    document.getElementById('financial-fields').style.display = 'none';
+    document.getElementById('text-fields').style.display = 'block';
+  } else if (type === 'personal') {
+    document.getElementById('action-modal-title').innerText = 'Личная финансовая операция';
+    document.getElementById('action-obj-field').style.display = 'none';
+    document.getElementById('payment-method-field').style.display = 'none';
+    sel.innerHTML = '<option value="personal">Личный контур</option>';
+  }
+
+  openModal('modal-action');
+}
+
+// ОБРАБОТКА ДАННЫХ
+async function createObject(e) {
+  e.preventDefault();
+  const obj = {
+    id: 'obj_' + Date.now(),
+    name: document.getElementById('obj-name').value,
+    tariff: document.getElementById('obj-tariff-select').value,
+    volume: parseFloat(document.getElementById('obj-volume').value),
+    priceUnit: parseFloat(document.getElementById('obj-price-unit').value),
+    total: parseFloat(document.getElementById('obj-contract-total').value),
+    history: [new Date().toLocaleDateString() + ' — Объект создан в системе']
+  };
+  state.objects.push(obj);
+  closeModal('modal-object');
+  await saveToCloud();
+  renderApp();
+}
+
+async function submitQuickAction(e) {
+  e.preventDefault();
+  const type = document.getElementById('action-type').value;
+  const objId = document.getElementById('action-object-id').value;
+  const comment = document.getElementById('action-comment').value;
+
+  if (type === 'task') {
+    state.tasks.push({ title: document.getElementById('action-title').value, done: false, comment });
+  } else if (type === 'sport') {
+    state.sports.push({ title: document.getElementById('action-title').value, comment, date: new Date().toLocaleDateString() });
+  } else {
+    const amount = parseFloat(document.getElementById('action-amount').value) || 0;
+    const trans = {
+      id: 't_' + Date.now(),
+      type, // payment, expense, purchase, personal
+      objId,
+      amount,
+      comment,
+      date: new Date().toLocaleDateString(),
+      meta: type === 'purchase' ? document.getElementById('action-purchase-meta').value : '',
+      status: type === 'purchase' ? document.getElementById('action-purchase-status').value : 'получено',
+      payType: type === 'payment' ? document.getElementById('action-payment-type').value : ''
+    };
+    state.transactions.push(trans);
+    
+    // Пишем лог изменений в объект
+    const obj = state.objects.find(o => o.id === objId);
+    if (obj) {
+      if (type === 'payment') obj.history.push(`${trans.date} — Получен ${trans.payType} на сумму ${amount} ₽`);
+      if (type === 'expense') obj.history.push(`${trans.date} — Расход по объекту: ${amount} ₽ (${comment})`);
+      if (type === 'purchase') obj.history.push(`${trans.date} — Новая закупка материалов [${trans.status}]: ${amount} ₽`);
+    }
+  }
+
+  closeModal('modal-action');
+  await saveToCloud();
+  renderApp();
+}
+
+// ОТРИСОВКА ВСЕГО ИНТЕРФЕЙСА
+function renderApp() {
+  // 1. Расчет общей финансовой аналитики
+  let totalReceived = 0;
+  state.transactions.forEach(t => {
+    if(t.type === 'payment') totalReceived += t.amount;
+  });
+  let totalTax = totalReceived * 0.06;
+  
+  let totalExpenses = 0;
+  state.transactions.forEach(t => {
+    if(t.type === 'expense' || (t.type === 'purchase' && t.status === 'Оплачено')) totalExpenses += t.amount;
+  });
+  let cleanBusinessBalance = totalReceived - totalTax - totalExpenses;
+
+  // Расчет личного баланса
+  let personalBalance = 0;
+  state.transactions.forEach(t => {
+    if(t.type === 'personal') personalBalance += t.amount; // Прибыль или вывод себе пишем с плюсом/минусом
+  });
+
+  document.getElementById('dash-received').innerText = totalReceived.toLocaleString() + ' ₽';
+  document.getElementById('dash-tax').innerText = totalTax.toLocaleString() + ' ₽';
+  document.getElementById('dash-clean').innerText = cleanBusinessBalance.toLocaleString() + ' ₽';
+  document.getElementById('dash-personal-balance').innerText = personalBalance.toLocaleString() + ' ₽';
+
+  // 2. Отрисовка Экрана Сегодня
+  const todayTasks = document.getElementById('today-tasks-list');
+  if(state.tasks.length === 0) {
+    todayTasks.innerHTML = '<div class="empty">На сегодня запланированных действий нет</div>';
+  } else {
+    todayTasks.innerHTML = state.tasks.map((t, i) => `
+      <div class="card" style="display:flex; align-items:center; justify-content:between; padding:12px;">
+        <label style="display:flex; align-items:center; gap:10px; width:100%;">
+          <input type="checkbox" ${t.done?'checked':''} onchange="toggleTask(${i})">
+          <span style="${t.done?'text-decoration:line-through; color:var(--muted);':''}">${t.title}</span>
+        </label>
+      </div>
+    `).join('');
+  }
+
+  const todaySports = document.getElementById('today-sports-list');
+  if(state.sports.length === 0) {
+    todaySports.innerHTML = '<div class="empty">Записей о тренировках нет</div>';
+  } else {
+    todaySports.innerHTML = state.sports.map(s => `
+      <div class="card" style="padding:12px;">
+        <div style="font-weight:700; color:var(--purple)">🏋️ ${s.title}</div>
+        <div style="font-size:11px; color:var(--muted); margin-top:4px;">${s.comment || 'Без заметок'}</div>
+      </div>
+    `).join('');
+  }
+
+  // 3. Отрисовка Объектов
+  const objGrid = document.getElementById('objects-grid');
+  if(state.objects.length === 0) {
+    objGrid.innerHTML = '<div class="empty" style="grid-column:1/-1">Нет созданных объектов. Нажмите "Новый объект", чтобы запустить расчет сметы.</div>';
+  } else {
+    objGrid.innerHTML = state.objects.map(o => {
+      // Расчет локальной экономики объекта
+      const oPayments = state.transactions.filter(t => t.objId === o.id && t.type === 'payment').reduce((sum,t)=>sum+t.amount, 0);
+      const oExpensesPaid = state.transactions.filter(t => t.objId === o.id && (t.type === 'expense' || (t.type === 'purchase' && t.status === 'Оплачено'))).reduce((sum,t)=>sum+t.amount, 0);
+      const oExpensesPlan = state.transactions.filter(t => t.objId === o.id && t.type === 'purchase' && t.status !== 'Оплачено').reduce((sum,t)=>sum+t.amount, 0);
+      
+      const debt = o.total - oPayments;
+      const tax = oPayments * 0.06;
+      const cleanProfit = o.total - tax - oExpensesPaid - oExpensesPlan; // Финансовый результат
+
+      return `
+        <div class="card">
+          <div class="object-top">
+            <div>
+              <h3>${o.name}</h3>
+              <p>Сумма по договору: <b>${o.total.toLocaleString()} ₽</b></p>
+            </div>
+            <span class="badge ${debt===0?'green':'blue'}">${debt===0?'Закрыт в 0':'В процессе'}</span>
+          </div>
+
+          <div class="grid g3" style="margin-top: 14px; background:rgba(0,0,0,0.1); padding:10px; border-radius:10px;">
+            <div>
+              <div class="stat-label">Получено</div>
+              <div style="font-weight:700; color:var(--green);">${oPayments.toLocaleString()} ₽</div>
+            </div>
+            <div>
+              <div class="stat-label">Закупки факт</div>
+              <div style="font-weight:700; color:var(--red);">${oExpensesPaid.toLocaleString()} ₽</div>
+            </div>
+            <div>
+              <div class="stat-label">Долг клиента</div>
+              <div style="font-weight:700; color:var(--muted);">${debt.toLocaleString()} ₽</div>
+            </div>
+          </div>
+
+          <div class="tax-card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <div class="stat-label" style="color:var(--amber); font-weight:700;">⚠️ Налог УСН 6%</div>
+                <div style="font-size:18px; font-weight:800; color:#fff;">${tax.toLocaleString()} ₽</div>
+              </div>
+              <div style="text-align:right">
+                <div class="stat-label">Прогноз прибыли</div>
+                <div style="font-size:18px; font-weight:800; color:var(--blue);">${cleanProfit.toLocaleString()} ₽</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top:12px;">
+            <div class="stat-label">История изменений:</div>
+            <div class="history-list">
+              ${o.history.slice(-3).map(h => `<div class="history-item">${h}</div>`).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // 4. Отрисовка закупок
+  const purchList = document.getElementById('purchases-global-list');
+  const allPurchases = state.transactions.filter(t => t.type === 'purchase');
+  if(allPurchases.length === 0) {
+    purchList.innerHTML = '<div class="empty" style="grid-column:1/-1">Списков планируемых закупок пока нет. Нажмите кнопку "Добавить" снизу.</div>';
+  } else {
+    purchList.innerHTML = allPurchases.map(p => {
+      const obj = state.objects.find(o => o.id === p.objId);
+      return `
+        <div class="card" style="border-left:4px solid ${p.status==='Оплачено'?'var(--green)':'var(--amber)'}">
+          <div style="display:flex; justify-content:space-between;">
+            <div style="font-weight:700; font-size:16px;">${p.comment || 'Материалы'}</div>
+            <span class="badge ${p.status==='Оплачено'?'green':'amber'}">${p.status}</span>
+          </div>
+          <div style="margin-top:8px; font-size:13px; color:var(--muted)">Объект: <b>${obj?obj.name:'Неизвестно'}</b></div>
+          <div style="font-size:13px; color:var(--muted)">Счет / Магазин: <span style="color:var(--ink)">${p.meta || 'Не указан'}</span></div>
+          <div style="font-size:20px; font-weight:800; margin-top:10px; color:#fff;">${p.amount.toLocaleString()} ₽</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // 5. Глобальные транзакции
+  const txLog = document.getElementById('global-transactions-log');
+  if(state.transactions.length === 0) {
+    txLog.innerHTML = '<div class="empty">Архив транзакций пуст</div>';
+  } else {
+    txLog.innerHTML = state.transactions.slice(-15).reverse().map(t => `
+      <div class="card" style="padding:10px; display:flex; justify-content:space-between; align-items:center; font-size:13px;">
+        <div>
+          <span style="color:var(--muted)">[${t.date}]</span> 
+          <b>${t.type === 'payment' ? 'Приход' : t.type==='expense' ? 'Расход' : t.type==='purchase'?'Закупка':'Личные'}</b> 
+          <span style="color:var(--muted)">— ${t.comment || ''}</span>
+        </div>
+        <div style="font-weight:800; color:${t.type==='payment'?'var(--green)':'#fff'}">${t.type==='payment'?'+':'-'} ${t.amount.toLocaleString()} ₽</div>
+      </div>
+    `).join('');
+  }
+}
+
+async function toggleTask(index) {
+  state.tasks[index].done = !state.tasks[index].done;
+  await saveToCloud();
+  renderApp();
+}
+
+function showToast(text) {
+  const t = document.getElementById('toast');
+  t.innerText = text;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>
